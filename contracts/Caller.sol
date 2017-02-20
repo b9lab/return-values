@@ -1,3 +1,5 @@
+pragma solidity ^0.4.5;
+
 import "Tool.sol";
 
 contract Caller {
