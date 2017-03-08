@@ -1,3 +1,5 @@
+var Structs = artifacts.require("./test/Structs.sol");
+
 Extensions = require("../utils/extensions.js");
 Extensions.init(web3, assert);
 
@@ -37,9 +39,8 @@ contract('Structs', function(accounts) {
             var addresses = randomAddressArray(run.count);
             var numbers = randomUintArray(run.count);
             return struct1.setAll(addresses, numbers, { from: owner, gas: 3000000 })
-                .then(web3.eth.getTransactionReceiptMined)
-                .then(receipt => {
-                    assert.isBelow(receipt.gasUsed, 3000000, "should have gone through");
+                .then(txObject => {
+                    assert.isBelow(txObject.receipt.gasUsed, 3000000, "should have gone through");
                     return struct1.getAll();
                 })
                 .then(all => {

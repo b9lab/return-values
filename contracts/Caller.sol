@@ -1,6 +1,6 @@
 pragma solidity ^0.4.5;
 
-import "Tool.sol";
+import "./Tool.sol";
 
 contract Caller {
     Tool public tool;

@@ -1,3 +1,6 @@
+var Caller = artifacts.require("./test/Caller.sol");
+var Tool = artifacts.require("./test/Tool.sol");
+
 Extensions = require("../utils/extensions.js");
 Extensions.init(web3, assert);
 
@@ -5,17 +8,23 @@ contract('Caller good calls', function(accounts) {
 
     it("calling good version should return correct values", function() {
 
-        var caller = Caller.deployed();
-        var tool = Tool.deployed();
+        var caller, tool;
 
-        return tool.number()
-            // We can call a public field
+        return Promise.all([
+                Caller.deployed(),
+                Tool.deployed()
+            ])
+            .then(instances => {
+                caller = instances[0];
+                tool = instances[1];
+                // We can call a public field
+                return tool.number();
+            })
             .then(number => {
                 assert.equal(number, 0, "number should start at 0");
                 return tool.setNumber(2, { from: accounts[0] });
             })
-            .then(web3.eth.getTransactionReceiptMined)
-            .then(receipt => tool.number())
+            .then(txObject => tool.number())
             .then(number => {
                 assert.equal(number, 2, "number should now be 2");
                 return tool.numberIsEven.call();
@@ -36,14 +45,12 @@ contract('Caller good calls', function(accounts) {
                 return caller.getNumberIfEvenGood({ from: accounts[0] });
                 // Because it is a direct call, we get the txn
             })
-            .then(web3.eth.getTransactionReceiptMined)
-            .then(receipt => caller.saved())
+            .then(txObject => caller.saved())
             .then(saved => {
                 assert.equal(saved, 2, "should have been updated to the number too");
                 return tool.setNumber(3, { from: accounts[0] });
             })
-            .then(web3.eth.getTransactionReceiptMined)
-            .then(receipt => tool.number())
+            .then(txObject => tool.number())
             .then(number => {
                 assert.equal(number, 3, "number should now be 3");
                 return tool.numberIsEven.call({ from: accounts[0] });
@@ -58,8 +65,7 @@ contract('Caller good calls', function(accounts) {
                 return caller.getNumberIfEvenGood({ from: accounts[0] });
                 // Because it is a direct call, we get the txn
             })
-            .then(web3.eth.getTransactionReceiptMined)
-            .then(receipt => caller.saved())
+            .then(txObject => caller.saved())
             .then(saved => {
                 assert.equal(saved, 0, "should have been updated to 0 too");
             });

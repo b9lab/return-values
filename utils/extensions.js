@@ -199,15 +199,19 @@ module.exports = {
     makeSureHasAtLeast: function (richAccount, recipients, wei) {
         var requests = [];
         recipients.forEach(function (recipient) {
-            if (web3.eth.getBalance(recipient).lessThan(wei)) {
-                requests.push(web3.eth.sendTransaction({
-                    from: richAccount,
-                    to: recipient,
-                    value: web3.toWei(2)
-                }));
-            }
+            requests.push(web3.eth.getBalancePromise(recipient)
+                .then(function (balance) {
+                    if (balance.lessThan(wei)) {
+                        return web3.eth.sendTransactionPromise({
+                            from: richAccount,
+                            to: recipient,
+                            value: wei
+                        });
+                    }
+                })
+            );
         });
-        return requests;
+        return Promise.all(requests);
     },
 
     makeSureAreUnlocked: function (accounts) {

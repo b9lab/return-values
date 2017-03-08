@@ -1,3 +1,5 @@
+var Arrays = artifacts.require("./test/Arrays.sol");
+
 Extensions = require("../utils/extensions.js");
 Extensions.init(web3, assert);
 
@@ -13,9 +15,7 @@ contract('Arrays', function(accounts) {
 
     beforeEach("should deploy an Arrays",function() {
         return Arrays.new({ from: owner })
-            .then(created => {
-                array1 = created;
-            });
+            .then(created => array1 = created);
     });
 
     var limits = {
@@ -36,9 +36,8 @@ contract('Arrays', function(accounts) {
         it("should be possible to push " + run.count + " and get", function() {
             var numbers = randomUintArray(run.count);
             return array1.setAll(numbers, { from: owner, gas: 3000000 })
-                .then(web3.eth.getTransactionReceiptMined)
-                .then(receipt => {
-                    assert.isBelow(receipt.gasUsed, 3000000, "should have gone through");
+                .then(txObject => {
+                    assert.isBelow(txObject.receipt.gasUsed, 3000000, "should have gone through");
                     return array1.getAll();
                 })
                 .then(all => {
